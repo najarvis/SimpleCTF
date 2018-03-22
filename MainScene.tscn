@@ -1,12 +1,14 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Map.png" type="Texture" id=1]
 [ext_resource path="res://FlagFlat.png" type="Texture" id=2]
-[ext_resource path="res://TeamColorShader.material" type="Material" id=3]
-[ext_resource path="res://Pedastal.png" type="Texture" id=4]
-[ext_resource path="res://GameCamera.gd" type="Script" id=5]
-[ext_resource path="res://Entity.gd" type="Script" id=6]
-[ext_resource path="res://Player1.png" type="Texture" id=7]
+[ext_resource path="res://Pedastal.gd" type="Script" id=3]
+[ext_resource path="res://TeamColorShader.material" type="Material" id=4]
+[ext_resource path="res://Pedastal.png" type="Texture" id=5]
+[ext_resource path="res://Flag.gd" type="Script" id=6]
+[ext_resource path="res://Entity.gd" type="Script" id=7]
+[ext_resource path="res://Player1.png" type="Texture" id=8]
+[ext_resource path="res://GameCamera.gd" type="Script" id=9]
 
 [sub_resource type="Shader" id=1]
 
@@ -55,6 +57,11 @@ render_priority = 0
 shader = SubResource( 3 )
 shader_param/nm_depth = 3.724
 _sections_unfolded = [ "Resource", "shader_param" ]
+
+[sub_resource type="ConvexPolygonShape2D" id=9]
+
+custom_solver_bias = 0.0
+points = PoolVector2Array( -11, -20, 12, -20, 25, 24, -24, 24 )
 
 [sub_resource type="ConvexPolygonShape2D" id=5]
 
@@ -130,19 +137,38 @@ texture = ExtResource( 1 )
 centered = false
 _sections_unfolded = [ "Material", "Offset", "Transform" ]
 
-[node name="Flag" type="Sprite" parent="Arena" index="0"]
+[node name="RedFlag" type="Sprite" parent="Arena" index="0"]
 
 material = SubResource( 4 )
 position = Vector2( 198.745, 500.966 )
 texture = ExtResource( 2 )
 _sections_unfolded = [ "Material" ]
 
-[node name="Pedastal" type="Sprite" parent="Arena" index="1"]
+[node name="RedPedastal" type="Area2D" parent="Arena" index="1"]
 
-material = ExtResource( 3 )
 position = Vector2( 197.722, 527.302 )
-texture = ExtResource( 4 )
+z_index = 5
+input_pickable = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+audio_bus_override = false
+audio_bus_name = "Master"
+script = ExtResource( 3 )
+_sections_unfolded = [ "Z Index" ]
+team = "Red"
+
+[node name="RedPedastalSprite" type="Sprite" parent="Arena/RedPedastal" index="0"]
+
+material = ExtResource( 4 )
+texture = ExtResource( 5 )
 _sections_unfolded = [ "Material" ]
+
+[node name="RedPedestalCollision" type="CollisionShape2D" parent="Arena/RedPedastal" index="1"]
+
+position = Vector2( 0.323532, 8.73538 )
+shape = SubResource( 9 )
 
 [node name="BlueFlag" type="Area2D" parent="Arena" index="2"]
 
@@ -154,12 +180,14 @@ linear_damp = 0.1
 angular_damp = 1.0
 audio_bus_override = false
 audio_bus_name = "Master"
+script = ExtResource( 6 )
+team = "Blue"
 
 [node name="BlueFlagSprite" type="Sprite" parent="Arena/BlueFlag" index="0"]
 
-material = SubResource( 4 )
+show_behind_parent = true
 texture = ExtResource( 2 )
-_sections_unfolded = [ "Material", "Transform" ]
+_sections_unfolded = [ "Material", "Transform", "Visibility" ]
 
 [node name="BlueFlagCollision" type="CollisionShape2D" parent="Arena/BlueFlag" index="1"]
 
@@ -169,8 +197,36 @@ shape = SubResource( 5 )
 
 material = SubResource( 7 )
 position = Vector2( 1697, 535.44 )
-texture = ExtResource( 4 )
-_sections_unfolded = [ "Material" ]
+z_index = 5
+texture = ExtResource( 5 )
+_sections_unfolded = [ "Material", "Z Index" ]
+
+[node name="MainPlayer" type="Area2D" parent="Arena" index="4"]
+
+position = Vector2( 512.257, 568.349 )
+scale = Vector2( 2, 2 )
+z_index = 10
+input_pickable = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+audio_bus_override = false
+audio_bus_name = "Master"
+script = ExtResource( 7 )
+_sections_unfolded = [ "Z Index" ]
+speed = 30
+team = "Red"
+
+[node name="PlayerSprite" type="Sprite" parent="Arena/MainPlayer" index="0"]
+
+material = ExtResource( 4 )
+texture = ExtResource( 8 )
+_sections_unfolded = [ "Material", "Transform" ]
+
+[node name="PlayerCollision" type="CollisionShape2D" parent="Arena/MainPlayer" index="1"]
+
+shape = SubResource( 8 )
 
 [node name="Camera2D" type="Camera2D" parent="." index="1"]
 
@@ -197,30 +253,6 @@ drag_margin_bottom = 0.2
 editor_draw_screen = true
 editor_draw_limits = false
 editor_draw_drag_margin = false
-script = ExtResource( 5 )
-
-[node name="MainPlayer" type="Area2D" parent="." index="2"]
-
-position = Vector2( 512.581, 529.848 )
-scale = Vector2( 2, 2 )
-input_pickable = true
-gravity_vec = Vector2( 0, 1 )
-gravity = 98.0
-linear_damp = 0.1
-angular_damp = 1.0
-audio_bus_override = false
-audio_bus_name = "Master"
-script = ExtResource( 6 )
-speed = 10
-
-[node name="PlayerSprite" type="Sprite" parent="MainPlayer" index="0"]
-
-material = ExtResource( 3 )
-texture = ExtResource( 7 )
-_sections_unfolded = [ "Material", "Transform" ]
-
-[node name="PlayerCollision" type="CollisionShape2D" parent="MainPlayer" index="1"]
-
-shape = SubResource( 8 )
+script = ExtResource( 9 )
 
 
