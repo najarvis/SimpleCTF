@@ -1,0 +1,226 @@
+[gd_scene load_steps=16 format=2]
+
+[ext_resource path="res://Map.png" type="Texture" id=1]
+[ext_resource path="res://FlagFlat.png" type="Texture" id=2]
+[ext_resource path="res://TeamColorShader.material" type="Material" id=3]
+[ext_resource path="res://Pedastal.png" type="Texture" id=4]
+[ext_resource path="res://GameCamera.gd" type="Script" id=5]
+[ext_resource path="res://Entity.gd" type="Script" id=6]
+[ext_resource path="res://Player1.png" type="Texture" id=7]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform vec4 arena_color : hint_color;
+
+float circle(vec2 circ_pos, vec2 uv, float radius) {
+	float diff_x = circ_pos.x - uv.x;
+	float diff_y = circ_pos.y - uv.y;
+	float dist = diff_x * diff_x + diff_y * diff_y;
+	if (dist < radius * radius) {
+		return 1.0;
+	}
+	return 1.0;
+}
+
+void fragment() {
+	vec2 circ_pos = vec2(512, 512);
+	vec2 pixel_coords = UV * vec2(textureSize(TEXTURE, 0));
+	COLOR.rgb = (texture(TEXTURE, UV) * arena_color).rgb * circle(circ_pos, pixel_coords, 50.0);
+}"
+_sections_unfolded = [ "Resource" ]
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/arena_color = Color( 0.336996, 0.8125, 0.333252, 1 )
+_sections_unfolded = [ "shader_param" ]
+
+[sub_resource type="Shader" id=3]
+
+code = "shader_type canvas_item;
+
+uniform float nm_depth;
+
+void fragment() {
+	//NORMAL = texture(NORMAL_TEXTURE,UV).rgb * vec3(2.0,-2.0,1.0) - vec3(1.0,-1.0,0.0);
+	NORMALMAP_DEPTH = nm_depth;
+}"
+
+[sub_resource type="ShaderMaterial" id=4]
+
+render_priority = 0
+shader = SubResource( 3 )
+shader_param/nm_depth = 3.724
+_sections_unfolded = [ "Resource", "shader_param" ]
+
+[sub_resource type="ConvexPolygonShape2D" id=5]
+
+custom_solver_bias = 0.0
+points = PoolVector2Array( -25, -32, 25, -32, 0, 32 )
+
+[sub_resource type="Shader" id=6]
+
+resource_name = "ReplaceColorShader"
+code = "shader_type canvas_item;
+
+// This shader will replace all of a given replacement color with 100% opacity.
+// This is good for images that use a colorkey channel such as those used for older games.
+
+uniform vec4 background_color : hint_color;
+uniform vec4 color1: hint_color;
+uniform vec4 color2: hint_color;
+uniform vec4 color3: hint_color;
+uniform vec4 color4: hint_color;
+
+mat4 make_matrix() {
+	return mat4(color1,
+	            color2,
+				color3,
+				color4);	
+}
+
+void fragment() {
+	vec4 texColor = texture(TEXTURE, UV);
+	if (texColor == background_color) {
+		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
+	}
+	
+	else if (texColor.r < 0.33) {
+		COLOR = color1;
+	}
+	else if (texColor.r < 0.67) {
+		COLOR = color2;
+	}
+	else if (texColor.r < 1.0) {
+		COLOR = color3;
+	}
+	else {
+		COLOR = color4;
+	}
+	
+}"
+_sections_unfolded = [ "Resource" ]
+
+[sub_resource type="ShaderMaterial" id=7]
+
+resource_name = "ReplaceColorMat"
+render_priority = 0
+shader = SubResource( 6 )
+shader_param/background_color = Color( 1, 0, 1, 1 )
+shader_param/color1 = Color( 0.679688, 0.116821, 0.116821, 1 )
+shader_param/color2 = Color( 0.0550842, 0.162444, 0.742188, 1 )
+shader_param/color3 = Color( 0.0241699, 0.0298347, 0.386719, 1 )
+shader_param/color4 = Color( 0.781952, 0.793439, 0.855469, 1 )
+_sections_unfolded = [ "Resource", "shader_param" ]
+
+[sub_resource type="ConvexPolygonShape2D" id=8]
+
+custom_solver_bias = 0.0
+points = PoolVector2Array( 0, -16, 16, 0, 0, 16, -16, 0 )
+
+[node name="Node" type="Node" index="0"]
+
+[node name="Arena" type="Sprite" parent="." index="0"]
+
+material = SubResource( 2 )
+texture = ExtResource( 1 )
+centered = false
+_sections_unfolded = [ "Material", "Offset", "Transform" ]
+
+[node name="Flag" type="Sprite" parent="Arena" index="0"]
+
+material = SubResource( 4 )
+position = Vector2( 198.745, 500.966 )
+texture = ExtResource( 2 )
+_sections_unfolded = [ "Material" ]
+
+[node name="Pedastal" type="Sprite" parent="Arena" index="1"]
+
+material = ExtResource( 3 )
+position = Vector2( 197.722, 527.302 )
+texture = ExtResource( 4 )
+_sections_unfolded = [ "Material" ]
+
+[node name="BlueFlag" type="Area2D" parent="Arena" index="2"]
+
+position = Vector2( 1697.58, 508.985 )
+input_pickable = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+audio_bus_override = false
+audio_bus_name = "Master"
+
+[node name="BlueFlagSprite" type="Sprite" parent="Arena/BlueFlag" index="0"]
+
+material = SubResource( 4 )
+texture = ExtResource( 2 )
+_sections_unfolded = [ "Material", "Transform" ]
+
+[node name="BlueFlagCollision" type="CollisionShape2D" parent="Arena/BlueFlag" index="1"]
+
+shape = SubResource( 5 )
+
+[node name="BluePedestal" type="Sprite" parent="Arena" index="3"]
+
+material = SubResource( 7 )
+position = Vector2( 1697, 535.44 )
+texture = ExtResource( 4 )
+_sections_unfolded = [ "Material" ]
+
+[node name="Camera2D" type="Camera2D" parent="." index="1"]
+
+position = Vector2( 946.592, 531.199 )
+anchor_mode = 1
+rotating = false
+current = true
+zoom = Vector2( 2, 2 )
+limit_left = -10000000
+limit_top = -10000000
+limit_right = 10000000
+limit_bottom = 10000000
+limit_smoothed = false
+drag_margin_h_enabled = true
+drag_margin_v_enabled = true
+smoothing_enabled = false
+smoothing_speed = 5.0
+offset_v = 0.0
+offset_h = 0.0
+drag_margin_left = 0.2
+drag_margin_top = 0.2
+drag_margin_right = 0.2
+drag_margin_bottom = 0.2
+editor_draw_screen = true
+editor_draw_limits = false
+editor_draw_drag_margin = false
+script = ExtResource( 5 )
+
+[node name="MainPlayer" type="Area2D" parent="." index="2"]
+
+position = Vector2( 512.581, 529.848 )
+scale = Vector2( 2, 2 )
+input_pickable = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+audio_bus_override = false
+audio_bus_name = "Master"
+script = ExtResource( 6 )
+speed = 10
+
+[node name="PlayerSprite" type="Sprite" parent="MainPlayer" index="0"]
+
+material = ExtResource( 3 )
+texture = ExtResource( 7 )
+_sections_unfolded = [ "Material", "Transform" ]
+
+[node name="PlayerCollision" type="CollisionShape2D" parent="MainPlayer" index="1"]
+
+shape = SubResource( 8 )
+
+
