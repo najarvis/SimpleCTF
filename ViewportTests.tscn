@@ -1,0 +1,123 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://MapWhite.png" type="Texture" id=1]
+[ext_resource path="res://Map.gd" type="Script" id=2]
+[ext_resource path="res://LightBlocker.res" type="PackedScene" id=3]
+[ext_resource path="res://LightHard.png" type="Texture" id=4]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+void fragment() {
+	vec4 defColor = texture(TEXTURE, UV);
+	/*
+	if (defColor.r == 0.0) {
+		COLOR.rgb = vec3(0.0);
+	} else {
+		COLOR = vec4(1.0);
+	}*/
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+
+[sub_resource type="ViewportTexture" id=3]
+
+resource_local_to_scene = true
+flags = 0
+viewport_path = NodePath("Viewport")
+
+[sub_resource type="Shader" id=4]
+
+code = "shader_type canvas_item;
+
+void fragment() {
+	//COLOR.rgb = vec3(0.0);	
+}"
+
+[sub_resource type="ShaderMaterial" id=5]
+
+render_priority = 0
+shader = SubResource( 4 )
+
+[node name="LOS Sprite" type="Sprite" index="0"]
+
+material = SubResource( 2 )
+texture = SubResource( 3 )
+_sections_unfolded = [ "Material", "Offset", "Transform" ]
+
+[node name="Viewport" type="Viewport" parent="." index="0"]
+
+arvr = false
+size = Vector2( 1920, 1080 )
+own_world = false
+world = null
+transparent_bg = false
+msaa = 0
+hdr = true
+disable_3d = false
+usage = 0
+debug_draw = 0
+render_target_v_flip = true
+render_target_clear_mode = 0
+render_target_update_mode = 2
+audio_listener_enable_2d = false
+audio_listener_enable_3d = false
+physics_object_picking = false
+gui_disable_input = false
+gui_snap_controls_to_pixels = true
+shadow_atlas_size = 0
+shadow_atlas_quad_0 = 2
+shadow_atlas_quad_1 = 2
+shadow_atlas_quad_2 = 3
+shadow_atlas_quad_3 = 4
+_sections_unfolded = [ "Render Target", "Rendering" ]
+
+[node name="Map" type="Sprite" parent="Viewport" index="0"]
+
+material = SubResource( 5 )
+position = Vector2( 697.468, 478.631 )
+texture = ExtResource( 1 )
+script = ExtResource( 2 )
+_sections_unfolded = [ "Material" ]
+
+[node name="LightBlocker" parent="Viewport" index="1" instance=ExtResource( 3 )]
+
+position = Vector2( 960, 400 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="LightBlocker2" parent="Viewport" index="2" instance=ExtResource( 3 )]
+
+position = Vector2( 600, 540 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="Light2D" type="Light2D" parent="Viewport" index="3"]
+
+position = Vector2( 960, 540 )
+enabled = true
+editor_only = false
+texture = ExtResource( 4 )
+offset = Vector2( 0, 0 )
+texture_scale = 2.77
+color = Color( 1, 1, 1, 1 )
+energy = 1.0
+mode = 0
+range_height = 0.0
+range_z_min = -1024
+range_z_max = 1024
+range_layer_min = 0
+range_layer_max = 0
+range_item_cull_mask = 1
+shadow_enabled = true
+shadow_color = Color( 0, 0, 0, 1 )
+shadow_buffer_size = 2048
+shadow_gradient_length = 0.0
+shadow_filter = 0
+shadow_filter_smooth = 0.0
+shadow_item_cull_mask = 1
+_sections_unfolded = [ "Shadow", "Transform" ]
+
+

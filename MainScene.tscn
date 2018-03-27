@@ -58,19 +58,18 @@ shader = SubResource( 3 )
 shader_param/nm_depth = 3.724
 _sections_unfolded = [ "Resource", "shader_param" ]
 
-[sub_resource type="ConvexPolygonShape2D" id=9]
+[sub_resource type="ConvexPolygonShape2D" id=5]
 
 custom_solver_bias = 0.0
 points = PoolVector2Array( -11, -20, 12, -20, 25, 24, -24, 24 )
 
-[sub_resource type="ConvexPolygonShape2D" id=5]
+[sub_resource type="ConvexPolygonShape2D" id=6]
 
 custom_solver_bias = 0.0
 points = PoolVector2Array( -25, -32, 25, -32, 0, 32 )
 
-[sub_resource type="Shader" id=6]
+[sub_resource type="Shader" id=7]
 
-resource_name = "ReplaceColorShader"
 code = "shader_type canvas_item;
 
 // This shader will replace all of a given replacement color with 100% opacity.
@@ -111,11 +110,10 @@ void fragment() {
 }"
 _sections_unfolded = [ "Resource" ]
 
-[sub_resource type="ShaderMaterial" id=7]
+[sub_resource type="ShaderMaterial" id=8]
 
-resource_name = "ReplaceColorMat"
 render_priority = 0
-shader = SubResource( 6 )
+shader = SubResource( 7 )
 shader_param/background_color = Color( 1, 0, 1, 1 )
 shader_param/color1 = Color( 0.679688, 0.116821, 0.116821, 1 )
 shader_param/color2 = Color( 0.0550842, 0.162444, 0.742188, 1 )
@@ -123,12 +121,12 @@ shader_param/color3 = Color( 0.0241699, 0.0298347, 0.386719, 1 )
 shader_param/color4 = Color( 0.781952, 0.793439, 0.855469, 1 )
 _sections_unfolded = [ "Resource", "shader_param" ]
 
-[sub_resource type="ConvexPolygonShape2D" id=8]
+[sub_resource type="ConvexPolygonShape2D" id=9]
 
 custom_solver_bias = 0.0
 points = PoolVector2Array( 0, -16, 16, 0, 0, 16, -16, 0 )
 
-[node name="Node" type="Node" index="0"]
+[node name="Node" type="Node"]
 
 [node name="Arena" type="Sprite" parent="." index="0"]
 
@@ -168,7 +166,7 @@ _sections_unfolded = [ "Material" ]
 [node name="RedPedestalCollision" type="CollisionShape2D" parent="Arena/RedPedastal" index="1"]
 
 position = Vector2( 0.323532, 8.73538 )
-shape = SubResource( 9 )
+shape = SubResource( 5 )
 
 [node name="BlueFlag" type="Area2D" parent="Arena" index="2"]
 
@@ -191,11 +189,11 @@ _sections_unfolded = [ "Material", "Transform", "Visibility" ]
 
 [node name="BlueFlagCollision" type="CollisionShape2D" parent="Arena/BlueFlag" index="1"]
 
-shape = SubResource( 5 )
+shape = SubResource( 6 )
 
 [node name="BluePedestal" type="Sprite" parent="Arena" index="3"]
 
-material = SubResource( 7 )
+material = SubResource( 8 )
 position = Vector2( 1697, 535.44 )
 z_index = 5
 texture = ExtResource( 5 )
@@ -226,7 +224,7 @@ _sections_unfolded = [ "Material", "Transform" ]
 
 [node name="PlayerCollision" type="CollisionShape2D" parent="Arena/MainPlayer" index="1"]
 
-shape = SubResource( 8 )
+shape = SubResource( 9 )
 
 [node name="Camera2D" type="Camera2D" parent="." index="1"]
 
