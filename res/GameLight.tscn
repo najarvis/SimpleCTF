@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://res/LightTexAlpha.png" type="Texture" id=1]
+[ext_resource path="res://Scenes/Light2D.gd" type="Script" id=2]
+
+[node name="Light2D2" type="Light2D"]
+
+enabled = true
+editor_only = false
+texture = ExtResource( 1 )
+offset = Vector2( 0, 0 )
+texture_scale = 5.84
+color = Color( 1, 1, 1, 1 )
+energy = 0.97
+mode = 1
+range_height = 0.0
+range_z_min = -1024
+range_z_max = 1024
+range_layer_min = 0
+range_layer_max = 0
+range_item_cull_mask = 1
+shadow_enabled = true
+shadow_color = Color( 0.746094, 0.171951, 0.171951, 0 )
+shadow_buffer_size = 2048
+shadow_gradient_length = 0.0
+shadow_filter = 0
+shadow_filter_smooth = 0.0
+shadow_item_cull_mask = 1
+script = ExtResource( 2 )
+_sections_unfolded = [ "Material", "Range", "Shadow", "Transform" ]
+
+

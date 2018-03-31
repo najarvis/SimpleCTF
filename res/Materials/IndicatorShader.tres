@@ -1,0 +1,122 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=2]
+
+[ext_resource path="res://res/UI/ringoffire.png" type="Texture" id=1]
+[ext_resource path="res://res/shaderTest.png" type="Texture" id=2]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform float max_lum;
+uniform sampler2D light_tex; // vec3(x/w, y/w, i/max_lum)
+uniform vec2 pos;
+
+uniform sampler2D indicator_tex;
+uniform bool use_tex;
+uniform vec4 indicator_color : hint_color;
+
+float get_arc(vec2 uv, float d, float r2, float theta) {
+	float pi = 3.14159265;
+	float w = 0.05; // Width of the indicator
+	float r = 0.43; // Radius of the indicator circle.
+	
+	// This gets the length of the indicator that should light up (technically half of it).
+	float arc_length = pi * r * asin(r2 / d);
+	
+	// Avoid tiny slivers
+	if (arc_length < 0.05) return 0.0;
+	
+	// Gets the current point in terms of a normalized vector from the center of a the texture.
+	vec2 unit_points = (vec2(0.5) - uv) / r;
+	unit_points.y *= -1.0;
+	
+	float dist = abs(distance(vec2(0.5), uv) - r);
+	
+	// Check if we are on the circle
+	if (dist < w) {
+	
+		// A bit of shading. This just makes it a bit brighter in the center of the circle than the edges.
+		float smooth_opacity = 1.5 - abs(distance(vec2(0.5), uv) - r) * 10.0;
+		
+		// Get the correct angle from 0 to 2 * pi. This lets us find the angle to any point on the circle.
+		float angle_at_point = (atan(unit_points.y, unit_points.x) + pi);
+		
+		float a = mod(theta - arc_length, 2.0 * pi);
+		float b = mod(theta + arc_length, 2.0 * pi);
+		
+		// This checks if the point it within a distance of arc_length from the given angle.
+		// Basically, if the arc_length is pi * radius, and the given angle is pi / 2,
+		// then this should return true for all points on the top half of the circle.
+		if (a < b) {
+			if (a < angle_at_point && angle_at_point < b)
+				return smooth_opacity; // a / (2.0 * pi);
+		} else {
+			if (!(b < angle_at_point && angle_at_point < a))
+				return smooth_opacity;
+		}
+	}
+	return 0.0;
+}
+
+float draw_all_indicators(vec2 uv) {
+	// This function combines the result of running get_arc for all lights at a given pixel.
+	
+	// Since we are returning an opacity value for each pixel, we start off with 0 (totally transparent).
+	float val = 0.0;
+	
+	// The image is 16x16 used to store the image. This allows us to store 256 real-time
+	// different lights. If we need more lights, we can move to 32x32 (1024 lights).
+	for (float v = 0.0; v < 16.0; v++) {
+		for (float u = 0.0; u < 16.0; u++) {
+			vec3 ld = texture(light_tex, vec2(u, v)/16.0).rgb;
+			if (ld.b == 0.0) continue;
+			
+			// Find the distance between the center of the indicator and the light.
+			float d = distance(pos, ld.rg);
+			
+			// Gets the radius of the light.
+			float r2 = max_lum * ld.b; // * 3.0;
+			
+			// Since we only want indicators to show indicators when lights are off-screen, this value can be used to
+			// control at what point the indicators show up (currently set low for debugging purposes).
+			if (d <= 0.01 || d < r2) {
+				continue;
+			}
+			
+			// Finds the angle from the center of the indicator to the light.
+			vec2 to_vec = (pos - ld.rg);
+			float theta = atan(to_vec.y, -to_vec.x);
+			
+			// Get the value at 
+			val += get_arc(uv, d, r2, theta);
+		}
+	}
+	
+	// We can set num_overlay to be how many times we want to be able to overlay these arcs. For example
+	// at 3 the player can tell the difference if there is only one light in a direction, two lights, or three.
+	float num_overlay = 3.0;
+	return min(num_overlay, val) / num_overlay;
+}
+
+void fragment() {
+	if (!use_tex)
+		COLOR = vec4(indicator_color.rgb, draw_all_indicators(UV));
+	else {
+		vec4 texColor = texture(indicator_tex, UV);
+		COLOR = vec4(texColor.rgb, draw_all_indicators(UV) * texColor.a);
+	}
+}"
+_sections_unfolded = [ "Resource" ]
+
+[resource]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/max_lum = 0.21
+shader_param/pos = Vector2( 0.15, 0.15 )
+shader_param/use_tex = false
+shader_param/indicator_color = Color( 0.863281, 0.756688, 0.0606995, 1 )
+shader_param/light_tex = ExtResource( 2 )
+shader_param/indicator_tex = ExtResource( 1 )
+_sections_unfolded = [ "shader_param" ]
+

@@ -1,0 +1,86 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=2]
+
+[ext_resource path="res://res/shaderTest.png" type="Texture" id=1]
+[ext_resource path="res://res/TestingMask.png" type="Texture" id=2]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform float max_lum;
+uniform sampler2D light_tex; // vec4(x / width, y / height, luminance / max_lum, 1.0)
+uniform sampler2D mask_tex; // Not currently in use.
+
+uniform vec4 fire_color : hint_color;
+uniform bool use_fire_color;
+
+float draw_light(vec2 uv, vec3 ld) {
+	// Returns the opacity a pixel should have for a given light
+	
+	// ld is in the form of a vec3 where the first two values are the normalized x and y
+	// coordinates. The final value i/max_lum is the normalized brightness value. This gets
+	// multiplied by the supplied max_lum input to output the final correct brightness.
+	
+	float ld_lum = ld.b * max_lum;
+	float ap_brightness = ld_lum / distance(uv, ld.rg);
+	
+	// Since we are actually returning an opacity value, we need to invert the apparent
+	// brightness. This is because the higher the opacity value, the less it will reveal
+	// of the background.
+	return 1.0 / ap_brightness; //* check_visibility(uv, ld.rg));
+	
+	// Note, if we want to sacrifice readability for speed (a marginal speedup), uncomment this line and comment out everything else.
+	// return distance(uv, ld.rg) / (ld.b * max_lum)
+}
+
+float draw_all_lights(vec2 uv) {
+	// This function combines the result of running draw_light for all lights at a given pixel.
+	
+	// Since we are returning an opacity value for each pixel, we start off with 1 (totally opaque).
+	float val = 1.0;
+	
+	// The image is 16x16 used to store the image. This allows us to store 256 real-time
+	// different lights. If we need more lights, we can move to 32x32 (1024 lights).
+	for (int a = 0; a < 256; a++) {
+		float u = float(a % 16);
+		float v = float(a / 16);
+		vec3 light_data = texture(light_tex, vec2(u, v)/16.0).rgb;
+		float light_val = min(1.0, draw_light(uv, light_data));
+		
+		// If the values are less than 1, when we multiply them against the current val to make it seem \"brighter\" even
+		// though the value of 'val' is decreasing.
+		val *= light_val;
+
+	}
+
+	return val;
+}
+
+void fragment() {
+	// Get the 'brightness' at a given UV coordinate.
+	float opacity = draw_all_lights(UV);
+	
+	// Fire color is more intense the closer to the center of the circle you are.
+	vec4 fire_intensity = fire_color * (1.0 - opacity);
+	
+	// Set the color accordingly.
+	if (use_fire_color) {
+		COLOR.rgba = vec4(fire_intensity.rgb, opacity);
+	} else {
+		COLOR.rgba = vec4(0.0, 0.0, 0.0, opacity);
+	}
+}
+"
+_sections_unfolded = [ "Resource" ]
+
+[resource]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/max_lum = 0.21
+shader_param/fire_color = Color( 0.878906, 0.491434, 0.0789642, 1 )
+shader_param/use_fire_color = true
+shader_param/light_tex = ExtResource( 1 )
+shader_param/mask_tex = ExtResource( 2 )
+_sections_unfolded = [ "Resource", "shader_param" ]
+

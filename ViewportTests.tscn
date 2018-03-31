@@ -43,7 +43,7 @@ void fragment() {
 render_priority = 0
 shader = SubResource( 4 )
 
-[node name="LOS Sprite" type="Sprite" index="0"]
+[node name="LOS Sprite" type="Sprite"]
 
 material = SubResource( 2 )
 texture = SubResource( 3 )
